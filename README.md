@@ -30,7 +30,8 @@ Whenever you need to write some data to results, you can use `Project` to
 easily get full filepaths:
 
 ```python
-path = pj.results_file('my_new_results.csv')
+path = pj.results_file('my_new_results.txt')
+# => /home/juan/myproject/results/my_new_results.txt
 
 with open(path, 'w') as f:
     f.write(some_new_results)
