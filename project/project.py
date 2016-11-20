@@ -3,6 +3,7 @@ from os.path import join, expanduser, abspath, basename, isdir
 from glob import glob
 from contextlib import redirect_stdout
 from io import StringIO
+import re
 import time
 import json
 
@@ -12,6 +13,11 @@ import pandas as pd
 
 class Project:
     def __init__(self, base_dir):
+        """
+        Initializing this class with a valid path will automatically create
+        the base_dir if it doesn't exist, and /data and /results subdirs if
+        they don't exist under base_dir.
+        """
         self.dir = abspath(expanduser(base_dir))
         self.name = basename(self.dir)
         self.data_dir = join(self.dir, 'data')
@@ -21,8 +27,11 @@ class Project:
             if not isdir(directory):
                 mkdir(directory)
 
-    def __repr__(self):
+    def __str__(self):
         return '<{} "{}">'.format(self.__class__.__name__, self.name)
+
+    def __repr__(self):
+        return "Project('{}')".format(self.dir)
 
     def _files_in_subdir(self, subdir, pattern, regex):
         """
@@ -36,14 +45,14 @@ class Project:
         if not pattern and not regex:
             return all_files
 
-        if regex:
-            return [fn for fn in all_files if re.search(regex, fn)]
-
         if pattern:
             return [fn for fn in glob(join(subdir, pattern))]
 
+        if regex:
+            return [fn for fn in all_files if re.search(regex, fn)]
+
     def _file_in_subdir(self, subdir, filename):
-        return join(subdir, filename)
+        return join(self.dir, subdir, filename)
 
     def data_files(self, pattern=None, regex=None):
         """
@@ -51,17 +60,19 @@ class Project:
         """
         return self._files_in_subdir(self.data_dir, pattern, regex)
 
-    def results_files(self, pattern=None):
+    def data_file(self, filename):
+        """Return the full path to a filename in /data."""
+        return self._file_in_subdir(self.data_dir, filename)
+
+    def results_files(self, pattern=None, regex=None):
         """
         List all the files in /results that match the given glob pattern or regex.
         """
         return self._files_in_subdir(self.results_dir, pattern, regex)
 
     def results_file(self, filename):
-        return self._file_in_subdir(self.reslts_dir, filename)
-
-    def data_file(self, filename):
-        return self._file_in_subdir(self.data_dir, filename)
+        """Return the full path to a filename in /results."""
+        return self._file_in_subdir(self.results_dir, filename)
 
     def dump_df(self, df, filename, subdir='results', index=None, **kwargs):
         """
