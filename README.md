@@ -1,7 +1,7 @@
 # Project
 
-`Project` is a handy class that will deal with your project's `data` and `results`
-subdirectories. Typical usage:
+`Project` is a handy Python class that will deal with your project's `data` and
+`results` subdirectories. Typical usage:
 
 ```python
 from project import Project
@@ -74,4 +74,13 @@ df = pj.read_csv('with_lists')
 df = pj.read_csv('some_data.csv', subdir='data', dtype={'colname': int})
 # => Read CSV from another subdir. The extra keyword arguments (here, dtype)
 #    are passed to pandas.read_csv()
+```
+
+
+## Installation
+
+```bash
+git clone https://github.com/biocodices/project.git
+cd project
+python setup.py install
 ```
