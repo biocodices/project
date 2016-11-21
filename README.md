@@ -19,7 +19,7 @@ pj.data_files()
 pj.data_files(pattern='*.vcf')
 # => Glob pattern for VCF files under /data
 
-pj.data_files(regex=r'.+\.(vcf|bam)')
+pj.data_files(regex=r'(vcf|bam)$')
 # => Regex for VCF and BAM files under /data
 
 pj.data_file('sample1.vcf')
