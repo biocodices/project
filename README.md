@@ -63,11 +63,10 @@ pj.dump_df(df, 'with_lists')
 # => Will write "with_lists.csv" and jsonify the lists [1, 2], [3, 4], etc.
 ```
 
-Next time when you read that same CSV, `Project` will load the JSON fields
-and convert them back to Python objects.
+Next time you read that same CSV, `Project` will load the JSON fields and
+convert them back to Python objects.
 
 ```python
-
 df = pj.read_csv('with_lists')
 # => Get a DataFrame with the JSON fields loaded back to Python objects.
 
@@ -75,7 +74,6 @@ df = pj.read_csv('some_data.csv', subdir='data', dtype={'colname': int})
 # => Read CSV from another subdir. The extra keyword arguments (here, dtype)
 #    are passed to pandas.read_csv()
 ```
-
 
 ## Installation
 
