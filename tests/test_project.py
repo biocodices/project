@@ -32,11 +32,16 @@ def test_subdir_lookup():
     csvs = pj.data_files(regex=r'data_.+\.(csv|tsv)')
     assert 'data_file.csv' in [basename(f) for f in csvs]
 
-def test_read_csv():
+def test_read_csv(capsys):
     pj = test_project
     df = pj.read_csv('data_file.csv', subdir='data')
     assert all(type(item) is dict for item in df['dicts'])
     assert all(type(item) is list for item in df['lists'])
+
+    out, _ = capsys.readouterr()
+    assert 'Parsed dicts as JSON' in out
+    assert 'Parsed lists as JSON' in out
+    assert 'memory usage:' in out
 
 def test_dump_df(tmpdir):
     df = pd.DataFrame({
