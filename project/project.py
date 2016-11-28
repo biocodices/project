@@ -71,8 +71,16 @@ class Project:
         return self._files_in_subdir(self.results_dir, pattern, regex)
 
     def results_file(self, filename):
-        """Return the full path to a filename in /results."""
+        """
+        Return the full filepath of a file with the given name in /results
+        """
         return self._file_in_subdir(self.results_dir, filename)
+
+    def data_file(self, filename):
+        """
+        Return the full filepath of a file with the given name in /data
+        """
+        return self._file_in_subdir(self.data_dir, filename)
 
     def dump_df(self, df, filename, subdir='results', index=None, **kwargs):
         """
