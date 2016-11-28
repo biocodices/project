@@ -12,12 +12,37 @@ import pandas as pd
 
 
 class Project:
+    """
+    This class is meant to help you manage a project's directories and data
+    and results filepaths.
+
+    Initializing this class with a valid path will automatically create
+    the base_dir if it doesn't exist, and /data and /results subdirs if
+    they don't exist under the base_dir.
+
+        > pj = Project('~/path/to/base_dir_of_project')
+
+    After that, you just use it to either get full filepaths to your data and
+    results files:
+
+        > pj.data_files()  # => list of files under <project>/data
+        > pj.results_files()  # => list of files under <project>/results
+
+    You can use glob patterns or regex to find files:
+
+        > pj.data_files('*.csv')  # => list the CSV files in <project>/data
+        > pj.results_files(regex='(csv|tsv)$')  # => list the CSV and TSV files
+
+    And you can dump a pandas.DataFrame and later retrieve it:
+
+        > pj.dump_df(my_dataframe, 'out')
+        # => writes to <project>/results/out.csv
+
+        > pj.read_csv('out.csv')
+        # => reads from <project>/results/out.csv
+    """
+
     def __init__(self, base_dir):
-        """
-        Initializing this class with a valid path will automatically create
-        the base_dir if it doesn't exist, and /data and /results subdirs if
-        they don't exist under base_dir.
-        """
         self.dir = abspath(expanduser(base_dir))
         self.name = basename(self.dir)
         self.data_dir = join(self.dir, 'data')
