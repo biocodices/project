@@ -13,7 +13,9 @@ import pandas as pd
 from humanfriendly import format_size
 
 
+logging.basicConfig(format='%(message)s')
 logger = logging.getLogger(__name__)
+logger.setLevel('INFO')
 
 
 class Project:
