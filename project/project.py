@@ -1,5 +1,5 @@
 from os import mkdir
-from os.path import join, expanduser, abspath, basename, isdir
+from os.path import join, expanduser, abspath, basename, isdir, getsize, isfile
 from glob import glob
 from contextlib import redirect_stdout
 from io import StringIO
@@ -9,6 +9,7 @@ import json
 
 import numpy as np
 import pandas as pd
+from humanfriendly import format_size
 
 
 class Project:
@@ -148,11 +149,13 @@ class Project:
             # TODO: There might be a better way to do this. Potential RAM hog.
             df = df.copy()
             for column_name in columns_to_jsonify:
-                print('  JSONifying "%s"' % column_name)
+                print('  JSONify "%s"' % column_name)
                 df[column_name] = df[column_name].map(json.dumps)
 
         df.to_csv(filepath, index=index, **kwargs)
-        print('Took {:.2f} seconds\n'.format(time.time() - t0))
+        print('Took {:.2f} seconds'.format(time.time() - t0))
+        print('File "{}" is {}\n'.format(basename(filepath),
+                                         format_size(getsize(filepath))))
 
         return filepath
 
@@ -174,7 +177,15 @@ class Project:
         """
         t0 = time.time()
         filepath = join(self.dir, subdir, filename)
-        print('Reading "{}"'.format(filename))
+        if not isfile(filepath):
+            filepath += '.csv'
+        if not isfile(filepath):
+            filepath = filepath.replace('.csv', '.tsv')
+        if not isfile(filepath):
+            filepath = filepath.replace('.tsv', '')  # Undo the modifications
+            msg = "No file '{}' found.".format(filepath)
+            raise FileNotFoundError(msg)
+        print('Reading "{}"'.format(basename(filepath)))
         df = pd.read_csv(filepath, **kwargs)
 
         # Don't try to parse a column as JSON if a dtype was already specified

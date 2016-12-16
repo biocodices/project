@@ -9,7 +9,7 @@ with open('README.md') as f:
 
 setup(
     name='Project',
-    version='1.0',
+    version='1.1',
     description=("A handy utility to deal with a project's data and results "
                  "subdirectories and files, specially CSVs."),
     long_description=long_description,
