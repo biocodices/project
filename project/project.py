@@ -6,10 +6,14 @@ from io import StringIO
 import re
 import time
 import json
+import logging
 
 import numpy as np
 import pandas as pd
 from humanfriendly import format_size
+
+
+logger = logging.getLogger(__name__)
 
 
 class Project:
@@ -61,7 +65,7 @@ class Project:
 
     def _files_in_subdir(self, subdir, pattern, regex):
         """
-        List all the files in subdir that match the given glob pattern or regex.
+        List the files in subdir that match the given glob pattern or regex.
         """
         if pattern and regex:
             raise ValueError("Specify pattern OR regex, not both!")
@@ -92,7 +96,7 @@ class Project:
 
     def results_files(self, pattern=None, regex=None):
         """
-        List all the files in /results that match the given glob pattern or regex.
+        List the files in /results that match the given glob pattern or regex.
         """
         return self._files_in_subdir(self.results_dir, pattern, regex)
 
@@ -101,12 +105,6 @@ class Project:
         Return the full filepath of a file with the given name in /results
         """
         return self._file_in_subdir(self.results_dir, filename)
-
-    def data_file(self, filename):
-        """
-        Return the full filepath of a file with the given name in /data
-        """
-        return self._file_in_subdir(self.data_dir, filename)
 
     def dump_df(self, df, filename, subdir='results', index=None, **kwargs):
         """
@@ -135,7 +133,7 @@ class Project:
             index = (type(df.index) not in num_index_types)
 
         filepath = self._file_in_subdir(subdir, filename)
-        print('Writing to "%s"' % filepath)
+        logger.info('Writing to "{}"'.format(filepath))
 
         columns_to_jsonify = []
         for column_name, series in df.iteritems():
@@ -149,13 +147,13 @@ class Project:
             # TODO: There might be a better way to do this. Potential RAM hog.
             df = df.copy()
             for column_name in columns_to_jsonify:
-                print('  JSONify "%s"' % column_name)
+                logger.info('  JSONify "{}"'.format(column_name))
                 df[column_name] = df[column_name].map(json.dumps)
 
         df.to_csv(filepath, index=index, **kwargs)
-        print('Took {:.2f} seconds'.format(time.time() - t0))
-        print('File "{}" is {}\n'.format(basename(filepath),
-                                         format_size(getsize(filepath))))
+        logger.info('Took {:.2f} seconds'.format(time.time() - t0))
+        logger.info('File "{}" is {}'.format(basename(filepath),
+                                             format_size(getsize(filepath))))
 
         return filepath
 
@@ -163,7 +161,7 @@ class Project:
         """Try to read a pandas Series as JSON. Returns None if it fails."""
         try:
             new_series = series.fillna('""').map(json.loads).replace('', np.nan)
-            print('  Parsed %s as JSON' % series.name)
+            logger.info('  Parsed "{}" as JSON'.format(series.name))
             return new_series
         except ValueError:
             return None
@@ -185,7 +183,7 @@ class Project:
             filepath = filepath.replace('.tsv', '')  # Undo the modifications
             msg = "No file '{}' found.".format(filepath)
             raise FileNotFoundError(msg)
-        print('Reading "{}"'.format(basename(filepath)))
+        logger.info('Reading "{}"'.format(basename(filepath)))
         df = pd.read_csv(filepath, **kwargs)
 
         # Don't try to parse a column as JSON if a dtype was already specified
@@ -205,10 +203,10 @@ class Project:
 
         info_lines = [line for line in captured_output.getvalue().split('\n')
                       if 'memory' in line]
-        print('\n'.join(info_lines))
+        logger.info('\n'.join(info_lines))
 
         elapsed = time.time() - t0
-        print('Took {:.2f} seconds'.format(elapsed), '\n')
+        logger.info('Took {:.2f} seconds'.format(elapsed))
 
         return df
 
@@ -216,10 +214,10 @@ class Project:
         try:
             import matplotlib.pyplot as plt
         except ImportError:
-            print("Seems you don't have matplotlib installed!")
+            logger.error("Seems you don't have matplotlib installed!")
             return
 
         filepath = self.results_file(filename)
         plt.savefig(filepath, bbox_inches='tight')
-        print('Written to', filepath)
+        logger.info('Written to', filepath)
 
