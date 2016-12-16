@@ -149,7 +149,7 @@ class Project:
             # TODO: There might be a better way to do this. Potential RAM hog.
             df = df.copy()
             for column_name in columns_to_jsonify:
-                logger.info('  JSONify "{}"'.format(column_name))
+                logger.info('JSONify "{}"'.format(column_name))
                 df[column_name] = df[column_name].map(json.dumps)
 
         df.to_csv(filepath, index=index, **kwargs)
@@ -163,7 +163,7 @@ class Project:
         """Try to read a pandas Series as JSON. Returns None if it fails."""
         try:
             new_series = series.fillna('""').map(json.loads).replace('', np.nan)
-            logger.info('  Parsed "{}" as JSON'.format(series.name))
+            logger.info('Parsed "{}" as JSON'.format(series.name))
             return new_series
         except ValueError:
             return None
