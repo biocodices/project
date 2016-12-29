@@ -1,8 +1,4 @@
-from os import rmdir, remove
 from os.path import isdir, isfile, basename, dirname, realpath, join
-
-import pandas as pd
-import pytest
 
 from project import Project
 
@@ -34,23 +30,18 @@ def test_subdir_lookup():
 
 def test_read_csv():
     pj = test_project
+    expected_columns = 'int_field string_field dicts lists'.split()
+
+    # Test it infers the trailing '.csv'
+    df = pj.read_csv('data_file', subdir='data')
+    assert df.columns.all(expected_columns)
+
+    # Test it has the right amount of cols & rows
     df = pj.read_csv('data_file.csv', subdir='data')
-    assert all(type(item) is dict for item in df['dicts'])
-    assert all(type(item) is list for item in df['lists'])
+    assert df.shape == (10, 4)
 
-def test_dump_df(tmpdir):
-    df = pd.DataFrame({
-            'a': [1, 2, 3],
-            'b': [['1'], ['2'], ['3']],
-            'c': [{'a': 1}, {'b': 2}, {'c': 3}]
-        })
-
-    pj = Project(str(tmpdir))
-    fn = pj.dump_df(df, 'test_dump')
-
-    assert isfile(fn)
-
-    fn = pj.dump_df(df, 'test_dump.tsv')
-    assert isfile(fn)
-    assert all(pd.read_table(fn).columns == ['a', 'b', 'c'])
+    # Test it correctly passes arguments to pandas.read_csv
+    df = pj.read_csv('data_file', subdir='data', usecols=[expected_columns[1]])
+    assert df.columns.all(expected_columns[1])
+    assert df.shape == (10, 1)
 
