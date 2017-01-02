@@ -4,6 +4,7 @@ import logging
 import json
 from io import StringIO
 from contextlib import redirect_stdout
+from functools import wraps
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,7 @@ def log_elapsed_time(func):
     """Decorates a function: it times how long it takes to execute and logs
        the elapsed time when it ends."""
 
+    @wraps(func)
     def wrapped_function(*args, **kwargs):
         t0 = time.time()
         result = func(*args, **kwargs)
