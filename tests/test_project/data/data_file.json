@@ -1,0 +1,8 @@
+{
+   "columns":["foo", "baz"],
+   "index":[0, 1],
+   "data":[
+       ["qux", "bar"],
+       ["boo", "loo"]
+   ]
+}

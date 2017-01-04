@@ -1,8 +1,11 @@
 from os import mkdir
-from os.path import join, expanduser, abspath, basename, isdir
+from os.path import join, expanduser, abspath, basename, isdir, getsize, isfile
 from glob import glob
 import re
 import logging
+
+import pandas as pd
+from humanfriendly import format_size
 
 from project.csv2df import dump_df, read_csv
 
@@ -102,13 +105,57 @@ class Project:
         """
         return self._file_in_subdir(self.results_dir, filename)
 
+    def dump_df_as_json(self, df, filename, subdir='results', **kwargs):
+        """
+        Dump a pandas.DataFrame as a 'split' formatted JSON file in the given
+        subdir (default='results') with the given filename. Adds '.json' to the
+        filename if not present.
+
+        'split' should be left as the default orient since it allows to
+        preserve the columns order of the dataframe for later use. However,
+        you can override this option with orient='records', for instance. If
+        you do so, keep in mind you will later need to specify that orient
+        option when reading the JSON with read_json_df().
+
+        Extra **kwargs are passed to pandas.DataFrame.to_json().
+        """
+        if not filename.endswith('json'):
+            filename += '.json'
+        filepath = self._file_in_subdir(subdir, filename)
+        if not 'orient' in kwargs:
+            kwargs['orient'] = 'split'
+        df.to_json(filepath, **kwargs)
+        size = format_size(getsize(filepath))
+        logger.info('Dumped a {} JSON to {}'.format(size, filepath))
+        return filepath
+
+    def read_json_df(self, filename, subdir='results', **kwargs):
+        """
+        Read a JSON with the given filename to a pandas.DataFrame. It will
+        search in the passed subdir (default='results') and it will try to
+        add '.json' to the filename if it fails.
+
+        The default orient is 'split', since it allows to keep the order of
+        the columns when serializing/deserializing. You can override this with
+        the 'orient' keyword argument, but the orient has to be consistent
+        with the format of the target JSON file.
+
+        Extra **kwargs are passed to pandas.read_json().
+        """
+        filepath = self._file_in_subdir(subdir, filename)
+        if not isfile(filepath) and not filepath.endswith('.json'):
+            filepath += '.json'
+        if not 'orient' in kwargs:
+            kwargs['orient'] = 'split'
+        return pd.read_json(filepath, **kwargs)
+
     def dump_df(self, df, filename, subdir='results', index=None, **kwargs):
         filepath = self._file_in_subdir(subdir, filename)
         dump_df(df, filepath, index, **kwargs)
         return filepath
 
     def read_csv(self, filename, subdir='results', **kwargs):
-        filepath = join(self.dir, subdir, filename)
+        filepath = self._file_in_subdir(subdir, filename)
         return read_csv(filepath, **kwargs)
 
     def save_last_plot(self, filename):

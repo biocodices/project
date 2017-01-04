@@ -75,6 +75,15 @@ df = pj.read_csv('some_data.csv', subdir='data', dtype={'colname': int})
 #    are passed to pandas.read_csv()
 ```
 
+`Project` also has read and dump utilities for df <-> JSON:
+
+```python
+pj.dump_df_as_json(my_dataframe, 'info')
+# => Will write a 'info.json' under /results
+pj.read_json_df('info')
+# => Will read the 'info.json' in /results
+```
+
 ## Installation
 
 ```bash
