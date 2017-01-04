@@ -13,13 +13,14 @@ def test_initialization(tmpdir):
     for directory in [pj.data_dir, pj.results_dir, pj.dir]:
         assert isdir(directory)
 
+
 def test_subdir_lookup():
     pj = test_project
 
     assert isfile(pj.data_file('data_file.txt'))
     assert isfile(pj.results_file('result.txt'))
 
-    assert len(pj.data_files()) == 2
+    assert len(pj.data_files()) == 3
     assert len(pj.results_files()) == 1
 
     txt_files = pj.data_files('*.txt')
@@ -27,6 +28,17 @@ def test_subdir_lookup():
 
     csvs = pj.data_files(regex=r'data_.+\.(csv|tsv)')
     assert 'data_file.csv' in [basename(f) for f in csvs]
+
+
+def test_read_json_df():
+    pj = test_project
+    df1 = pj.read_json_df('data_file.json', subdir='data')
+    df2 = pj.read_json_df('data_file', subdir='data')
+
+    for df in [df1, df2]:
+        assert list(df.columns) == ['foo', 'baz']  # Check order is preserved
+        assert df.loc[1, 'foo'] == 'boo'
+
 
 def test_read_csv():
     pj = test_project
