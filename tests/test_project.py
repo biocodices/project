@@ -1,4 +1,7 @@
+from os import remove
 from os.path import isdir, isfile, basename, dirname, realpath, join
+
+import pandas as pd
 
 from project import Project
 
@@ -38,6 +41,21 @@ def test_read_json_df():
     for df in [df1, df2]:
         assert list(df.columns) == ['foo', 'baz']  # Check order is preserved
         assert df.loc[1, 'foo'] == 'boo'
+
+
+def test_dump_df_as_json():
+    pj = test_project
+    df = pd.DataFrame([{'foo': 1, 'bar': 2},
+                       {'foo': 3, 'bar': 4}])
+
+    target_file = pj.dump_df_as_json(df, 'test_df')
+    assert isfile(target_file)
+
+    df_read = pj.read_json_df(target_file)
+    assert all(df == df_read)
+
+    remove(target_file)  # Cleanup
+    assert not isfile(target_file)
 
 
 def test_read_csv():

@@ -143,7 +143,7 @@ class Project:
         Extra **kwargs are passed to pandas.read_json().
         """
         filepath = self._file_in_subdir(subdir, filename)
-        if not isfile(filepath) and not filepath.endswith('.json'):
+        if not isfile(filepath) and isfile(filepath + '.json'):
             filepath += '.json'
         if not 'orient' in kwargs:
             kwargs['orient'] = 'split'

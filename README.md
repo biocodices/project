@@ -75,7 +75,8 @@ df = pj.read_csv('some_data.csv', subdir='data', dtype={'colname': int})
 #    are passed to pandas.read_csv()
 ```
 
-`Project` also has read and dump utilities for df <-> JSON:
+`Project` also has read and dump utilities to conver a dataframe to JSON
+and to read the JSON back to a dataframe later:
 
 ```python
 pj.dump_df_as_json(my_dataframe, 'info')
