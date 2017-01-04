@@ -82,7 +82,7 @@ and to read the JSON back to a dataframe later:
 pj.dump_df_as_json(my_dataframe, 'info')
 # => Will write a 'info.json' under /results
 pj.read_json_df('info')
-# => Will read the 'info.json' in /results
+# => Will read the 'info.json' previously saved in /results
 ```
 
 ## Installation
