@@ -33,10 +33,10 @@ def test_subdir_lookup():
     assert 'data_file.csv' in [basename(f) for f in csvs]
 
 
-def test_read_json_df():
+def test_load_json_df():
     pj = test_project
-    df1 = pj.read_json_df('data_file.json', subdir='data')
-    df2 = pj.read_json_df('data_file', subdir='data')
+    df1 = pj.load_json_df('data_file.json', subdir='data')
+    df2 = pj.load_json_df('data_file', subdir='data')
 
     for df in [df1, df2]:
         assert list(df.columns) == ['foo', 'baz']  # Check order is preserved
@@ -51,7 +51,7 @@ def test_dump_df_as_json():
     target_file = pj.dump_df_as_json(df, 'test_df')
     assert isfile(target_file)
 
-    df_read = pj.read_json_df(target_file)
+    df_read = pj.load_json_df(target_file)
     assert all(df == df_read)
 
     remove(target_file)  # Cleanup

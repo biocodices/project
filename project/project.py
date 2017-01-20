@@ -129,7 +129,7 @@ class Project:
         logger.info('Dumped a {} JSON to {}'.format(size, filepath))
         return filepath
 
-    def read_json_df(self, filename, subdir='results', **kwargs):
+    def load_json_df(self, filename, subdir='results', **kwargs):
         """
         Read a JSON with the given filename to a pandas.DataFrame. It will
         search in the passed subdir (default='results') and it will try to
