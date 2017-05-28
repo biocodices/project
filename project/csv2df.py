@@ -56,8 +56,8 @@ def dump_df(df, filepath, index=None, **kwargs):
         # Don't include the index if it's just ordered numbers
         # This guessing can be overriden by specifying 'index' as True
         num_index_types = [
-            pd.indexes.range.RangeIndex,
-            pd.indexes.numeric.Int64Index
+            pd.core.indexes.range.RangeIndex,
+            pd.core.indexes.numeric.Int64Index
         ]
         index = (type(df.index) not in num_index_types)
 

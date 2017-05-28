@@ -1,25 +1,48 @@
-from os import remove
+from os import remove, getpid
+from tempfile import gettempdir
 from os.path import isdir, isfile, basename, dirname, realpath, join
 
+import pytest
 import pandas as pd
 
 from project import Project
 
 
 TEST_DIR = dirname(realpath(__file__))
-test_project = Project(join(TEST_DIR, 'test_project'))
+
+@pytest.fixture
+def pj():
+    return Project(join(TEST_DIR, 'test_project'))
 
 
-def test_initialization(tmpdir):
-    pj = Project(str(tmpdir))
+def test_initialization():
+    dir_name = join(gettempdir(), 'test_project__'.format(getpid()))
+    Project(dir_name)  # This step should create all directories
 
-    for directory in [pj.data_dir, pj.results_dir, pj.dir]:
+    expected_directories = [
+        dir_name,
+        join(dir_name, 'data'),
+        join(dir_name, 'results')
+    ]
+    for directory in expected_directories:
         assert isdir(directory)
 
+    # A second initialization should not fail if the target directories exist
+    Project(dir_name)
 
-def test_subdir_lookup():
-    pj = test_project
 
+def test_file_in_subdir(pj):
+    non_existent_filename = 'non-existent-file'
+
+    with pytest.raises(FileNotFoundError):
+        pj._file_in_subdir('data', non_existent_filename, check_exists=True)
+
+    path = pj._file_in_subdir('some-subdir', non_existent_filename,
+                              check_exists=False)
+    assert path == join(pj.dir, 'some-subdir', non_existent_filename)
+
+
+def test_subdir_lookup(pj):
     assert isfile(pj.data_file('data_file.txt'))
     assert isfile(pj.results_file('result.txt'))
 
@@ -33,8 +56,7 @@ def test_subdir_lookup():
     assert 'data_file.csv' in [basename(f) for f in csvs]
 
 
-def test_load_json_df():
-    pj = test_project
+def test_load_json_df(pj):
     df1 = pj.load_json_df('data_file.json', subdir='data')
     df2 = pj.load_json_df('data_file', subdir='data')
 
@@ -43,8 +65,7 @@ def test_load_json_df():
         assert df.loc[1, 'foo'] == 'boo'
 
 
-def test_dump_df_as_json():
-    pj = test_project
+def test_dump_df_as_json(pj):
     df = pd.DataFrame([{'foo': 1, 'bar': 2},
                        {'foo': 3, 'bar': 4}])
 
@@ -58,8 +79,7 @@ def test_dump_df_as_json():
     assert not isfile(target_file)
 
 
-def test_read_csv():
-    pj = test_project
+def test_read_csv(pj):
     expected_columns = 'int_field string_field dicts lists'.split()
 
     # Test it infers the trailing '.csv'

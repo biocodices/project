@@ -80,8 +80,17 @@ class Project:
         if regex:
             return [fn for fn in all_files if re.search(regex, fn)]
 
-    def _file_in_subdir(self, subdir, filename):
-        return join(self.dir, subdir, filename)
+    def _file_in_subdir(self, subdir, filename, check_exists=False):
+        """
+        Search for *filename* under *subdir*. If *check_exists* is set,
+        raise if the resulting filepath is not an existing file or dir.
+        """
+        filepath = join(self.dir, subdir, filename)
+
+        if check_exists and not isfile(filepath) and not isdir(filepath):
+            raise FileNotFoundError(filepath)
+
+        return filepath
 
     def data_files(self, pattern=None, regex=None):
         """
@@ -89,9 +98,13 @@ class Project:
         """
         return self._files_in_subdir(self.data_dir, pattern, regex)
 
-    def data_file(self, filename):
-        """Return the full path to a filename in /data."""
-        return self._file_in_subdir(self.data_dir, filename)
+    def data_file(self, filename, check_exists=True):
+        """
+        Return the full path to a filename in /data. It checks the existence of
+        the file or dir and raises if it's not there, unless *check_exists*
+        is set to False.
+        """
+        return self._file_in_subdir(self.data_dir, filename, check_exists)
 
     def results_files(self, pattern=None, regex=None):
         """
@@ -99,11 +112,14 @@ class Project:
         """
         return self._files_in_subdir(self.results_dir, pattern, regex)
 
-    def results_file(self, filename):
+    def results_file(self, filename, check_exists=False):
         """
-        Return the full filepath of a file with the given name in /results
+        Return the full filepath of a file with the given name in /results.
+
+        If *check_exists* is set to True, checks the existence of either a
+        file or a dir with the *filename* under self.results_dir.
         """
-        return self._file_in_subdir(self.results_dir, filename)
+        return self._file_in_subdir(self.results_dir, filename, check_exists)
 
     def dump_df_as_json(self, df, filename, subdir='results', **kwargs):
         """
