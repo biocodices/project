@@ -174,6 +174,19 @@ class Project:
         filepath = self._file_in_subdir(subdir, filename)
         return read_csv(filepath, **kwargs)
 
+    def _get_notebook_name(self):
+        """
+        Gets the name of the current Jupyter notebook (if this code is run
+        from Jupyter!).
+        """
+        from IPython.lib import kernel
+
+        connection_file_path = kernel.get_connection_file()
+        connection_file = basename(connection_file_path)
+        kernel_id = connection_file.split('-', 1)[1].split('.')[0]
+
+        return kernel_id
+
     def save_last_plot(self, filename):
         try:
             import matplotlib.pyplot as plt

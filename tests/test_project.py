@@ -1,9 +1,11 @@
 from os import remove, getpid
 from tempfile import gettempdir
-from os.path import isdir, isfile, basename, dirname, realpath, join
+from os.path import isdir, isfile, dirname, realpath, join
+from unittest.mock import MagicMock
 
 import pytest
 import pandas as pd
+from IPython.lib import kernel
 
 from project import Project
 
@@ -72,6 +74,14 @@ def test_results_file(pj):
 
     with pytest.raises(FileNotFoundError):
         pj.results_file('non-existent-file', check_exists=True)
+
+
+def test_get_notebook_name(pj, monkeypatch):
+    fn = '/run/user/1000/jupyter/kernel-123-abc-lalala.json'
+    mock = MagicMock(return_value=fn)
+    monkeypatch.setattr(kernel, 'get_connection_file', mock)
+
+    assert pj._get_notebook_name() == '123-abc-lalala'
 
 
 def test_load_json_df(pj):
