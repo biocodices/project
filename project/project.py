@@ -79,6 +79,9 @@ class Project:
         """
         Initialize a Project using the title of the current notebook as the
         directory name for the project.
+
+        Usage:
+            > pj = Project.from_notebook()
         """
         notebook_name = cls.get_notebook_name()
 
