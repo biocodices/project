@@ -225,6 +225,8 @@ class Project:
         """
         Gets the name of the current Jupyter notebook (if this code is run
         from Jupyter!).
+
+        WARNING: This does not work when token authentication is enabled!
         """
         import json
         import requests
