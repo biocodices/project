@@ -49,8 +49,8 @@ def test_file_in_subdir(pj):
 def test_data_files(pj):
     data_files = [
         'data_file.csv',
-        'data_file.txt',
         'data_file.json',
+        'data_file.txt',
     ]
     assert pj.data_files() == [join(pj.data_dir, fn) for fn in data_files]
     assert pj.data_files(pattern='*.csv')[0].endswith('data_file.csv')
