@@ -42,18 +42,36 @@ def test_file_in_subdir(pj):
     assert path == join(pj.dir, 'some-subdir', non_existent_filename)
 
 
-def test_subdir_lookup(pj):
-    assert isfile(pj.data_file('data_file.txt'))
-    assert isfile(pj.results_file('result.txt'))
+def test_data_files(pj):
+    data_files = [
+        'data_file.csv',
+        'data_file.txt',
+        'data_file.json',
+    ]
+    assert pj.data_files() == [join(pj.data_dir, fn) for fn in data_files]
+    assert pj.data_files(pattern='*.csv')[0].endswith('data_file.csv')
+    assert len(pj.data_files(regex=r'data_.+\.(csv|txt)')) == 2
 
-    assert len(pj.data_files()) == 3
-    assert len(pj.results_files()) == 1
+def test_data_file(pj):
+    assert pj.data_file('data_file.csv') == join(pj.data_dir, 'data_file.csv')
 
-    txt_files = pj.data_files('*.txt')
-    assert 'data_file.txt' in [basename(f) for f in txt_files]
+    with pytest.raises(FileNotFoundError):
+        pj.data_file('non-existent-file')
 
-    csvs = pj.data_files(regex=r'data_.+\.(csv|tsv)')
-    assert 'data_file.csv' in [basename(f) for f in csvs]
+
+def test_results_files(pj):
+    expected = join(pj.results_dir, 'result.txt')
+    assert pj.results_files() == [expected]
+    assert pj.results_files('*.txt') == [expected]
+    assert pj.results_files('*.no-file') == []
+    assert pj.results_files(regex=r'txt$') == [expected]
+
+
+def test_results_file(pj):
+    assert pj.results_file('result.txt') == join(pj.results_dir, 'result.txt')
+
+    with pytest.raises(FileNotFoundError):
+        pj.results_file('non-existent-file', check_exists=True)
 
 
 def test_load_json_df(pj):
