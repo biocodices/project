@@ -2,6 +2,8 @@ from os import remove, getpid
 from tempfile import gettempdir
 from os.path import isdir, isfile, dirname, realpath, join
 from unittest.mock import MagicMock
+import json
+import requests
 
 import pytest
 import pandas as pd
@@ -76,12 +78,34 @@ def test_results_file(pj):
         pj.results_file('non-existent-file', check_exists=True)
 
 
-def test_get_notebook_name(pj, monkeypatch):
+def test_get_notebook_name(monkeypatch):
     fn = '/run/user/1000/jupyter/kernel-123-abc-lalala.json'
     mock = MagicMock(return_value=fn)
     monkeypatch.setattr(kernel, 'get_connection_file', mock)
+    kernels_json = [{'notebook': {'path': 'nb-name.ipynb'},
+                     'kernel': {'id': '123-abc-lalala'}}]
 
-    assert pj._get_notebook_name() == '123-abc-lalala'
+    # Mock requests response to simulate a running local kernel
+    class Response:
+        text = json.dumps(kernels_json)
+
+    monkeypatch.setattr(requests, 'get', lambda _: Response)
+
+    assert Project.get_notebook_name() == 'nb-name'
+
+
+def test_from_notebook(monkeypatch):
+    monkeypatch.setattr(Project, 'get_notebook_name', lambda: 'Nb-Name')
+    mock_init = MagicMock(return_value=None)
+    monkeypatch.setattr(Project, '__init__', mock_init)
+
+    Project.from_notebook()
+    mock_init.assert_called_once_with(base_dir='Nb-Name')
+
+    # It won't create a project directory after an "Untitled" notebook!
+    monkeypatch.setattr(Project, 'get_notebook_name', lambda: 'Untitled')
+    with pytest.raises(ValueError):
+        Project.from_notebook()
 
 
 def test_load_json_df(pj):

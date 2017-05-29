@@ -26,24 +26,42 @@ class Project:
 
         > pj = Project('~/path/to/base_dir_of_project')
 
-    After that, you just use it to either get full filepaths to your data and
-    results files:
+    If you are working from a Jupyter Notebook, you may set the name of
+    the notebook as your intended directory name and initialize the project
+    in this way:
+
+        > pj = Project.from_notebook()
+
+    Typically, you would copy your input files to `pj.data_dir` and store
+    later results on `pj.results_dir`.
+
+    You can then use the project instance to either full filepaths to any file
+    in those directories:
 
         > pj.data_files()  # => list of files under <project>/data
         > pj.results_files()  # => list of files under <project>/results
+        > pj.data_files('*.csv')  # => glob pattern to list the CSVs in /data
+        > pj.results_files(regex='(csv|tsv)$')
+        # => ^ or a regex for CSV/TSVs under /results
 
-    You can use glob patterns or regex to find files:
-
-        > pj.data_files('*.csv')  # => list the CSV files in <project>/data
-        > pj.results_files(regex='(csv|tsv)$')  # => list the CSV and TSV files
-
-    And you can dump a pandas.DataFrame and later retrieve it:
+    You can dump a pandas.DataFrame and later retrieve it:
 
         > pj.dump_df(my_dataframe, 'out')
         # => writes to <project>/results/out.csv
 
         > pj.read_csv('out.csv')
         # => reads from <project>/results/out.csv
+
+    If your pandas DataFrame has jsonable values (lists and dicts, for
+    instance), then you might find it better to dump it as JSON:
+
+        > pj.dump_df_as_json(my_dataframe, 'out')
+        # => writes to <project>/results/out.json in 'split' format
+
+        > pj.load_json_df('out')  # you can omit the ".json"
+        # => loads the same DataFrame, preserving column order and
+        #    deserializing the JSON columns
+
     """
 
     def __init__(self, base_dir):
@@ -55,6 +73,20 @@ class Project:
         for directory in [self.dir, self.data_dir, self.results_dir]:
             if not isdir(directory):
                 mkdir(directory)
+
+    @classmethod
+    def from_notebook(cls):
+        """
+        Initialize a Project using the title of the current notebook as the
+        directory name for the project.
+        """
+        notebook_name = cls.get_notebook_name()
+
+        if notebook_name == 'Untitled':
+            msg = 'Please set a name for this notebook that is not "Untitled".'
+            raise ValueError(msg)
+
+        return cls(base_dir=notebook_name)
 
     def __str__(self):
         return '<{} "{}">'.format(self.__class__.__name__, self.name)
@@ -174,19 +206,6 @@ class Project:
         filepath = self._file_in_subdir(subdir, filename)
         return read_csv(filepath, **kwargs)
 
-    def _get_notebook_name(self):
-        """
-        Gets the name of the current Jupyter notebook (if this code is run
-        from Jupyter!).
-        """
-        from IPython.lib import kernel
-
-        connection_file_path = kernel.get_connection_file()
-        connection_file = basename(connection_file_path)
-        kernel_id = connection_file.split('-', 1)[1].split('.')[0]
-
-        return kernel_id
-
     def save_last_plot(self, filename):
         try:
             import matplotlib.pyplot as plt
@@ -198,3 +217,24 @@ class Project:
         plt.savefig(filepath, bbox_inches='tight')
         logger.info('Written to', filepath)
 
+    @staticmethod
+    def get_notebook_name(host='localhost', port='8888'):
+        """
+        Gets the name of the current Jupyter notebook (if this code is run
+        from Jupyter!).
+        """
+        import json
+        import requests
+
+        from IPython.lib import kernel
+
+        connection_file_path = kernel.get_connection_file()
+        connection_file = basename(connection_file_path)
+        kernel_id = connection_file.split('-', 1)[1].split('.')[0]
+
+        url = 'http://{}:{}/api/sessions'.format(host, port)
+        sessions = json.loads(requests.get(url).text)
+        for session in sessions:
+            if session['kernel']['id'] == kernel_id:
+                path = session['notebook']['path']
+                return basename(path).replace('.ipynb', '')
