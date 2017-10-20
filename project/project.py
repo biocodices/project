@@ -67,12 +67,18 @@ class Project:
     def __init__(self, base_dir):
         self.dir = abspath(expanduser(base_dir))
         self.name = basename(self.dir)
+
+        print('Initializing Project "{}"'.format(self.name))
+
         self.data_dir = join(self.dir, 'data')
         self.results_dir = join(self.dir, 'results')
 
         for directory in [self.dir, self.data_dir, self.results_dir]:
             if not isdir(directory):
+                print('Creating dir: {}'.format(directory))
                 mkdir(directory)
+            else:
+                print('Already exists: {}'.format(directory))
 
     @classmethod
     def from_notebook(cls):
@@ -220,26 +226,29 @@ class Project:
         plt.savefig(filepath, bbox_inches='tight')
         logger.info('Written to', filepath)
 
-    @staticmethod
-    def get_notebook_name(host='localhost', port='8888'):
-        """
-        Gets the name of the current Jupyter notebook (if this code is run
-        from Jupyter!).
+    ## This would be nice, but it's not functional so far:
 
-        WARNING: This does not work when token authentication is enabled!
-        """
-        import json
-        import requests
+    #  @staticmethod
+    #  def get_notebook_name(host='localhost', port='8888'):
+        #  """
+        #  Gets the name of the current Jupyter notebook (if this code is run
+        #  from Jupyter!).
 
-        from IPython.lib import kernel
+        #  WARNING: This does not work when token authentication is enabled!
+        #  """
+        #  import json
+        #  import requests
 
-        connection_file_path = kernel.get_connection_file()
-        connection_file = basename(connection_file_path)
-        kernel_id = connection_file.split('-', 1)[1].split('.')[0]
+        #  from IPython.lib import kernel
 
-        url = 'http://{}:{}/api/sessions'.format(host, port)
-        sessions = json.loads(requests.get(url).text)
-        for session in sessions:
-            if session['kernel']['id'] == kernel_id:
-                path = session['notebook']['path']
-                return basename(path).replace('.ipynb', '')
+        #  connection_file_path = kernel.get_connection_file()
+        #  connection_file = basename(connection_file_path)
+        #  kernel_id = connection_file.split('-', 1)[1].split('.')[0]
+
+        #  url = 'http://{}:{}/api/sessions'.format(host, port)
+        #  response = requests.get(url).text
+        #  sessions = json.loads(response)
+        #  for session in sessions:
+            #  if session['kernel']['id'] == kernel_id:
+                #  path = session['notebook']['path']
+                #  return basename(path).replace('.ipynb', '')

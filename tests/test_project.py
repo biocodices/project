@@ -78,34 +78,37 @@ def test_results_file(pj):
         pj.results_file('non-existent-file', check_exists=True)
 
 
-def test_get_notebook_name(monkeypatch):
-    fn = '/run/user/1000/jupyter/kernel-123-abc-lalala.json'
-    mock = MagicMock(return_value=fn)
-    monkeypatch.setattr(kernel, 'get_connection_file', mock)
-    kernels_json = [{'notebook': {'path': 'nb-name.ipynb'},
-                     'kernel': {'id': '123-abc-lalala'}}]
+## The code for this is not yet functional, and it's also commented out in
+## the Project class:
 
-    # Mock requests response to simulate a running local kernel
-    class Response:
-        text = json.dumps(kernels_json)
+#  def test_get_notebook_name(monkeypatch):
+    #  fn = '/run/user/1000/jupyter/kernel-123-abc-lalala.json'
+    #  mock = MagicMock(return_value=fn)
+    #  monkeypatch.setattr(kernel, 'get_connection_file', mock)
+    #  kernels_json = [{'notebook': {'path': 'nb-name.ipynb'},
+                     #  'kernel': {'id': '123-abc-lalala'}}]
 
-    monkeypatch.setattr(requests, 'get', lambda _: Response)
+    #  # Mock requests response to simulate a running local kernel
+    #  class Response:
+        #  text = json.dumps(kernels_json)
 
-    assert Project.get_notebook_name() == 'nb-name'
+    #  monkeypatch.setattr(requests, 'get', lambda _: Response)
+
+    #  assert Project.get_notebook_name() == 'nb-name'
 
 
-def test_from_notebook(monkeypatch):
-    monkeypatch.setattr(Project, 'get_notebook_name', lambda: 'Nb-Name')
-    mock_init = MagicMock(return_value=None)
-    monkeypatch.setattr(Project, '__init__', mock_init)
+#  def test_from_notebook(monkeypatch):
+    #  monkeypatch.setattr(Project, 'get_notebook_name', lambda: 'Nb-Name')
+    #  mock_init = MagicMock(return_value=None)
+    #  monkeypatch.setattr(Project, '__init__', mock_init)
 
-    Project.from_notebook()
-    mock_init.assert_called_once_with(base_dir='Nb-Name')
+    #  Project.from_notebook()
+    #  mock_init.assert_called_once_with(base_dir='Nb-Name')
 
-    # It won't create a project directory after an "Untitled" notebook!
-    monkeypatch.setattr(Project, 'get_notebook_name', lambda: 'Untitled')
-    with pytest.raises(ValueError):
-        Project.from_notebook()
+    #  # It won't create a project directory after an "Untitled" notebook!
+    #  monkeypatch.setattr(Project, 'get_notebook_name', lambda: 'Untitled')
+    #  with pytest.raises(ValueError):
+        #  Project.from_notebook()
 
 
 def test_load_json_df(pj):
