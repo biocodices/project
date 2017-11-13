@@ -48,13 +48,16 @@ def test_file_in_subdir(pj):
 
 def test_data_files(pj):
     data_files = [
+        'subdir/file_in_subdir.txt',
         'data_file.csv',
         'data_file.json',
         'data_file.txt',
     ]
-    assert pj.data_files() == [join(pj.data_dir, fn) for fn in data_files]
+    for data_file in data_files:
+        assert join(pj.data_dir, data_file) in pj.data_files()
+
     assert pj.data_files(pattern='*.csv')[0].endswith('data_file.csv')
-    assert len(pj.data_files(regex=r'data_.+\.(csv|txt)')) == 2
+    assert len(pj.data_files(regex=r'\.(csv|txt)')) == 3
 
 def test_data_file(pj):
     assert pj.data_file('data_file.csv') == join(pj.data_dir, 'data_file.csv')

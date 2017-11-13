@@ -110,13 +110,14 @@ class Project:
         if pattern and regex:
             raise ValueError("Specify pattern OR regex, not both!")
 
-        all_files = glob(join(subdir, (pattern or '*')))
+        all_files = glob(join(subdir, (pattern or '**')), recursive=True)
+        all_files = [fp for fp in all_files if isfile(fp)]
 
         if not pattern and not regex:
             return all_files
 
         if pattern:
-            return [fn for fn in glob(join(subdir, pattern))]
+            return [fn for fn in glob(join(subdir, pattern), recursive=True)]
 
         if regex:
             return [fn for fn in all_files if re.search(regex, fn)]
