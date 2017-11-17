@@ -41,9 +41,24 @@ def test_file_in_subdir(pj):
     with pytest.raises(FileNotFoundError):
         pj._file_in_subdir('data', non_existent_filename, check_exists=True)
 
-    path = pj._file_in_subdir('some-subdir', non_existent_filename,
+    result = pj._file_in_subdir('some-subdir', non_existent_filename,
                               check_exists=False)
-    assert path == join(pj.dir, 'some-subdir', non_existent_filename)
+    assert result == join(pj.dir, 'some-subdir', non_existent_filename)
+
+    # Accepts a pattern:
+    unambiguous_pattern = '*_in_subdir*'
+    result = pj._file_in_subdir(pj.data_dir, unambiguous_pattern,
+                                check_exists=True)
+    assert result == join(pj.dir, 'data/subdir/file_in_subdir.txt')
+
+    unambiguous_pattern = '*file.json'
+    result = pj._file_in_subdir(pj.data_dir, unambiguous_pattern,
+                                check_exists=True)
+    assert result == join(pj.dir, 'data/data_file.json')
+
+    with pytest.raises(FileNotFoundError):
+        ambiguous_pattern = 'data_*'
+        pj._file_in_subdir(pj.dir, ambiguous_pattern, check_exists=True)
 
 
 def test_data_files(pj):

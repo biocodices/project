@@ -126,10 +126,24 @@ class Project:
         """
         Search for *filename* under *subdir*. If *check_exists* is set,
         raise if the resulting filepath is not an existing file or dir.
+
+        If the file doesn't exist, it will try to use the *filename* as a
+        glob pattern and check if there's only one file matching that
+        pattern. If this is not the case, it will fail.
         """
         filepath = join(self.dir, subdir, filename)
 
         if check_exists and not isfile(filepath) and not isdir(filepath):
+
+            # Try the filename as a pattern or regex before failing:
+            matches = self._files_in_subdir(subdir,
+                                            pattern='**/{}'.format(filename),
+                                            regex=None)
+
+            # Don't accept ambiguous patterns!
+            if len(matches) == 1:
+                return matches[0]
+
             raise FileNotFoundError(filepath)
 
         return filepath
