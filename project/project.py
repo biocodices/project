@@ -137,7 +137,7 @@ class Project:
 
             # Try the filename as a pattern or regex before failing:
             matches = self._files_in_subdir(subdir,
-                                            pattern='**/{}'.format(filename),
+                                            pattern='**/*{}*'.format(filename),
                                             regex=None)
 
             # Don't accept ambiguous patterns!
