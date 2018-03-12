@@ -229,14 +229,18 @@ class Project:
         filepath = self._file_in_subdir(subdir, filename)
         return read_csv(filepath, **kwargs)
 
-    def save_last_plot(self, filename):
+    def save_last_plot(self, filename, subdir='results'):
+        """
+        Save the last matplotlib plot to the given +filename+ under the given
+        +subdir+.
+        """
         try:
             import matplotlib.pyplot as plt
         except ImportError:
             logger.error("Seems you don't have matplotlib installed!")
             return
 
-        filepath = self.results_file(filename)
+        filepath = self._file_in_subdir(subdir, filename)
         plt.savefig(filepath, bbox_inches='tight')
         logger.info('Written to', filepath)
 
