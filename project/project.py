@@ -242,7 +242,7 @@ class Project:
 
         filepath = self._file_in_subdir(subdir, filename)
         plt.savefig(filepath, bbox_inches='tight')
-        logger.info('Written to', filepath)
+        logger.info('Written to {}'.format(filepath))
 
     ## This would be nice, but it's not functional so far:
 
