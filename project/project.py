@@ -1,6 +1,6 @@
 from os import mkdir
 from os.path import join, expanduser, abspath, basename, isdir, getsize, isfile
-from path import Path
+from pathlib import Path
 from glob import glob
 import re
 import logging
