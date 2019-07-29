@@ -1,5 +1,6 @@
 from os import mkdir
 from os.path import join, expanduser, abspath, basename, isdir, getsize, isfile
+from path import Path
 from glob import glob
 import re
 import logging
@@ -70,8 +71,8 @@ class Project:
 
         print('Initializing Project "{}"'.format(self.name))
 
-        self.data_dir = join(self.dir, 'data')
-        self.results_dir = join(self.dir, 'results')
+        self.data_dir = Path(join(self.dir, 'data'))
+        self.results_dir = Path(join(self.dir, 'results'))
 
         for directory in [self.dir, self.data_dir, self.results_dir]:
             if not isdir(directory):
