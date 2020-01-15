@@ -43,6 +43,11 @@ def dump_df(df, filepath, index=None, **kwargs):
 
     Extra **kwargs will be passed to pandas.DataFrame.to_csv()
     """
+    nrows, ncols = df.shape
+    ncells = df.size
+    logger.info(f'Will dump a dataframe with {nrows:,} rows ' +
+                f'and {ncols:,} cols (number of cells: {ncells:,})')
+
     if 'sep' not in kwargs:
         if filepath.endswith('.tsv'):
             kwargs['sep'] = '\t'
