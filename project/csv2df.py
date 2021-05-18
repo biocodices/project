@@ -49,12 +49,12 @@ def dump_df(df, filepath, index=None, **kwargs):
                 f'and {ncols:,} cols (number of cells: {ncells:,})')
 
     if 'sep' not in kwargs:
-        if filepath.endswith('.tsv'):
+        if '.tsv' in filepath:
             kwargs['sep'] = '\t'
         else:
             kwargs['sep'] = ','
 
-    if kwargs['sep'] == ',' and not filepath.endswith('.csv'):
+    if kwargs['sep'] == ',' and not '.csv' in filepath:
         filepath += '.csv'
 
     if index is None:
